@@ -27,7 +27,9 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.lokeshponnada.locationtracker.database.LocationModel;
 import com.lokeshponnada.locationtracker.database.TrackerDatabase;
+import com.lokeshponnada.locationtracker.repository.LocationRepository;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final int LOCATION_PERMISSION_CODE = 1;
     private final int CHECK_SETTINGS_CODE = 2;
-    private final int LOCATION_INTERVAL_MILLIS = 1000;
+    private final int LOCATION_INTERVAL_MILLIS = 5000;
 
 
     TrackerDatabase db;
@@ -59,8 +61,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        createDB();
 
         // bind ui
         ButterKnife.bind(this);
@@ -72,12 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
         // todo can get last location here
 
-    }
-
-
-    private void createDB(){
-         db = Room.databaseBuilder(getApplicationContext(),
-                TrackerDatabase.class, "database-name").build();
     }
 
     @Override
@@ -99,13 +93,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void startLocationUpdates() {
+    private boolean startLocationUpdates() {
         if(checkLocationPermission()){
             mFusedLocationClient.requestLocationUpdates(locationRequest,
                     locationCallback,
                     null /* Looper */);
+            return true;
         }else {
-            // Permission already asked in this case
+            return false;
         }
 
     }
@@ -133,8 +128,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         task.addOnSuccessListener(locationSettingsResponse -> {
-            modifyUI(true);
-            startLocationUpdates();
+            if(startLocationUpdates()){
+                modifyUI(true);
+            }
         });
 
         task.addOnFailureListener(e -> {
@@ -158,6 +154,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 for (Location location : locationResult.getLocations()) {
+                    LocationModel locationModel = new LocationModel();
+                    locationModel.setLat(location.getLatitude());
+                    locationModel.setLng(location.getLongitude());
+                    locationModel.setSource(location.getProvider());
+                    locationModel.setTime(location.getTime());
+                    LocationRepository.getRepository(getApplicationContext()).processLocation(locationModel);
                     Log.d("Lokesh",location.getProvider() + "-"+location.getTime() + "-"+location.getLatitude()+"-"+location.getLongitude());
                 }
             }
@@ -193,11 +195,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean checkLocationPermission(){
         int res = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if(res != PackageManager.PERMISSION_GRANTED){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
-                    showExplanationDiaog();
-            }else{
-                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_PERMISSION_CODE);
-            }
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_PERMISSION_CODE);
+
+//            if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
+//                    showExplanationDiaog();
+//            }else{
+//                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_PERMISSION_CODE);
+//            }
             return false;
         }else{
             return true;

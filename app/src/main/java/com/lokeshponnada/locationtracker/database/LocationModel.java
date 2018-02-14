@@ -12,6 +12,7 @@ import android.arch.persistence.room.PrimaryKey;
 @Entity(tableName = "locations")
 public class LocationModel {
 
+
     @PrimaryKey(autoGenerate = true)
     private int _id;
 
@@ -22,6 +23,16 @@ public class LocationModel {
     private String source;
 
     private long time;
+
+    private boolean posted;
+
+    public boolean isPosted() {
+        return posted;
+    }
+
+    public void setPosted(boolean posted) {
+        this.posted = posted;
+    }
 
     public long getTime() {
         return time;

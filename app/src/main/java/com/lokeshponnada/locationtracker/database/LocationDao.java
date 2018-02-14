@@ -17,8 +17,8 @@ public interface LocationDao {
     @Query("SELECT * FROM locations")
     List<LocationModel> getAllLocations();
 
-//    @Query("SELECT * FROM locations WHERE time  > reqTime")
-//    List<LocationModel> getLocations(long reqTime);
+    @Query("SELECT * FROM locations WHERE posted = 'false'")
+    List<LocationModel> getLocations();
 
     @Insert
     void addLocation(LocationModel location);
