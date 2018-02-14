@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Location Tracker</string>
+    <string name="start_tracking">Start Tracking</string>
+    <string name="stop_tracking">Stop Tracking</string>
+    <string name="tracking_now">Tracking your current location</string>
+    <string name="cannot_track_pemission">Cannot track location without permission</string>
+</resources>
