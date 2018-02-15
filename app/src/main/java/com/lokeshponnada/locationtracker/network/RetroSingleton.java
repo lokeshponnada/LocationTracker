@@ -3,6 +3,7 @@ package com.lokeshponnada.locationtracker.network;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.concurrent.Executors;
 
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
@@ -37,9 +38,11 @@ public class RetroSingleton {
             .baseUrl("https://api.locus.sh/v1/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
+            .callbackExecutor(Executors.newSingleThreadExecutor())
             .build();
 
     static NetworkInterface networkInterface;
+
 
     public static NetworkInterface getNetworkService(){
         if(networkInterface == null){
