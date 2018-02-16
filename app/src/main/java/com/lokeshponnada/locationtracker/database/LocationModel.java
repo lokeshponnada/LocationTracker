@@ -3,6 +3,7 @@ package com.lokeshponnada.locationtracker.database;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.location.Location;
 
 /**
  * Created by lokesh on 14/02/18.
@@ -12,6 +13,15 @@ import android.arch.persistence.room.PrimaryKey;
 @Entity(tableName = "locations")
 public class LocationModel {
 
+    public LocationModel(){}
+
+    public LocationModel(Location location){
+        super();
+        lat = location.getLatitude();
+        lng = location.getLongitude();
+        source = location.getProvider();
+        time = location.getTime();
+    }
 
     @PrimaryKey(autoGenerate = true)
     private long _id;

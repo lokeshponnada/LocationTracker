@@ -20,7 +20,7 @@ public interface LocationDao {
     @Query("SELECT * FROM locations")
     List<LocationModel> getAllLocations();
 
-    @Query("SELECT * FROM locations WHERE posted = 'false'")
+    @Query("SELECT * FROM locations WHERE posted = 0")
     List<LocationModel> getNonPostedLocations();
 
     @Insert

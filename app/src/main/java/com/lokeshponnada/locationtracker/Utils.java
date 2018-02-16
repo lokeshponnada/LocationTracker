@@ -1,5 +1,6 @@
 package com.lokeshponnada.locationtracker;
 
+import android.Manifest;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -19,10 +20,11 @@ public class Utils {
         Toast.makeText(ctx,msg,Toast.LENGTH_LONG).show();
     }
 
-    public boolean isGooglePlayServicesAvailable(Context context){
+    public static boolean isGooglePlayServicesAvailable(Context context){
         GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context);
-        return resultCode == ConnectionResult.SUCCESS;
+        return false;
+//        return resultCode == ConnectionResult.SUCCESS;
     }
 
     // Can be false positive in case of limited connectivity
@@ -34,7 +36,11 @@ public class Utils {
         boolean isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
         return isConnected;
+    }
 
+
+    public static String getPermission(int precision){
+        return Manifest.permission.ACCESS_FINE_LOCATION;
     }
 
 }

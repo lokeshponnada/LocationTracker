@@ -5,6 +5,7 @@ import android.app.Application;
 import com.evernote.android.job.JobManager;
 import com.facebook.stetho.Stetho;
 import com.lokeshponnada.locationtracker.background.LocationJobCreator;
+import com.lokeshponnada.locationtracker.background.LocationSyncJob;
 
 /**
  * Created by lokesh on 15/02/18.
@@ -20,5 +21,8 @@ public class LocationApplication extends Application {
         Stetho.initializeWithDefaults(this);
 
         JobManager.create(this).addJobCreator(new LocationJobCreator());
+
+        LocationSyncJob job = new LocationSyncJob();
+        job.scheduleJob();
     }
 }

@@ -39,7 +39,8 @@ public class LocationSyncJob extends Job {
     public static void scheduleJob() {
         new JobRequest.Builder(LocationSyncJob.TAG)
                 .setPeriodic(TimeUnit.MINUTES.toMillis(AppConfig.SYNC_TIME), TimeUnit.MINUTES.toMillis(AppConfig.SYNC_GRACE_TIME))
-                .setExecutionWindow(30_000L, 40_000L)
+                .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
+                .setUpdateCurrent(true)
                 .build()
                 .schedule();
     }
