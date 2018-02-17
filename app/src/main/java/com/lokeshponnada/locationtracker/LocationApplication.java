@@ -4,8 +4,8 @@ import android.app.Application;
 
 import com.evernote.android.job.JobManager;
 import com.facebook.stetho.Stetho;
-import com.lokeshponnada.locationtracker.background.LocationJobCreator;
-import com.lokeshponnada.locationtracker.background.LocationSyncJob;
+import com.lokeshponnada.locationtracker.sync.LocationJobCreator;
+import com.lokeshponnada.locationtracker.sync.LocationSyncJob;
 
 /**
  * Created by lokesh on 15/02/18.

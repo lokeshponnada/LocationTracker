@@ -4,4 +4,9 @@
     <string name="stop_tracking">Stop Tracking</string>
     <string name="tracking_now">Tracking your current location</string>
     <string name="cannot_track_pemission">Cannot track location without permission</string>
+    <string name="cannot_track_turnon">Please turn on location for tracking</string>
+    <string name="enable_provider">Your GPS seems to be disabled, do you want to enable it?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="service_desc">This Service Syncs your location periodically</string>
 </resources>

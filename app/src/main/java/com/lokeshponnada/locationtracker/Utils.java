@@ -2,8 +2,10 @@ package com.lokeshponnada.locationtracker;
 
 import android.Manifest;
 import android.content.Context;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -23,8 +25,12 @@ public class Utils {
     public static boolean isGooglePlayServicesAvailable(Context context){
         GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context);
-        return false;
 //        return resultCode == ConnectionResult.SUCCESS;
+        return false;
+    }
+
+    public static boolean isProviderEnabled(@NonNull LocationManager manager, @NonNull String provider){
+        return manager.isProviderEnabled(provider);
     }
 
     // Can be false positive in case of limited connectivity

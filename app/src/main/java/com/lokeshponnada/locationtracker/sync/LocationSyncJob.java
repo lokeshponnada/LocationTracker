@@ -1,4 +1,4 @@
-package com.lokeshponnada.locationtracker.background;
+package com.lokeshponnada.locationtracker.sync;
 
 import android.support.annotation.NonNull;
 
