@@ -2,20 +2,16 @@ package com.lokeshponnada.locationtracker.repository;
 
 import android.arch.persistence.room.Room;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.lokeshponnada.locationtracker.Utils;
 import com.lokeshponnada.locationtracker.database.LocationModel;
 import com.lokeshponnada.locationtracker.database.TrackerDatabase;
-import com.lokeshponnada.locationtracker.network.NetworkInterface;
 import com.lokeshponnada.locationtracker.network.NetworkModel;
 import com.lokeshponnada.locationtracker.network.RetroSingleton;
-
-import javax.security.auth.callback.Callback;
+import com.lokeshponnada.locationtracker.remoteconfig.AppConfig;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -38,7 +34,7 @@ public class LocationRepository {
     public TrackerDatabase getDb(Context context){
         if(db == null){
             db = Room.databaseBuilder(context.getApplicationContext(),
-                    TrackerDatabase.class, "location_db").build();
+                    TrackerDatabase.class, AppConfig.DB_NAME).build();
         }
         return db;
     }
@@ -50,15 +46,10 @@ public class LocationRepository {
         return locationRepository;
     }
 
-
     public void processLocation(LocationModel locationModel){
-
-        // todo replace with intent service ?
-        new DBAsynkTask().execute(new LocationModel[]{locationModel});
+        new DBInsertTask().execute(new LocationModel[]{locationModel});
     }
 
-
-    // todo make this non static , so that ctx is not abused
     public static void postLocation(LocationModel locationModel){
 
         if(!Utils.isConnectedToNetwork(ctx)){
@@ -71,24 +62,22 @@ public class LocationRepository {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 locationModel.setPosted(true);
-                // todo must change later
-                Log.d("Lokesh_JOB","Posted : " + locationModel.get_id());
                 if(locationModel.get_id() != -1){
-                    new BackgroundTask().doInBackground(locationModel);
+                    new DBUpdateTask().doInBackground(locationModel);
                 }else{
-                    // location failed to save in db but was reported , lost from history ?
+                    // location failed to save in db but was reported
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                //todo location already saved in db. Job Schedular will take care
+                // location already saved in db. Scheduler will take care
             }
         });
     }
 
 
-    private static class DBAsynkTask extends AsyncTask<LocationModel,Void,Void>{
+    private static class DBInsertTask extends AsyncTask<LocationModel,Void,Void>{
 
         @Override
         protected Void doInBackground(LocationModel... locationModels) {
@@ -100,15 +89,14 @@ public class LocationRepository {
 
     }
 
-
-    private static class BackgroundTask extends AsyncTask<LocationModel, Void, Void> {
+    private static class DBUpdateTask extends AsyncTask<LocationModel, Void, Void> {
 
         @Override
         protected Void doInBackground(LocationModel... locationModels) {
             try{
                 db.locationDao().updateLocation(locationModels[0]);
             }catch (Exception e){
-                // update failed
+                // update failed, ignore
             }
             return null;
         }

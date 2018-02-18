@@ -16,11 +16,23 @@ public class LocationModel {
     public LocationModel(){}
 
     public LocationModel(Location location){
-        super();
         lat = location.getLatitude();
         lng = location.getLongitude();
         source = location.getProvider();
         time = location.getTime();
+    }
+
+
+    public LocationModel(LocationModel model){
+        this.lat = model.lat;
+        this.lng = model.lng;
+        this.source = model.source;
+        this.time = model.time;
+    }
+
+    public static LocationModel getCopy(LocationModel model){
+        LocationModel newModel =  new LocationModel(model);
+        return newModel;
     }
 
     @PrimaryKey(autoGenerate = true)

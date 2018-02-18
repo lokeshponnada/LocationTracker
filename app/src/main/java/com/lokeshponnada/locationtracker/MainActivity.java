@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -30,18 +31,22 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.lokeshponnada.locationtracker.remoteconfig.AppConfig;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.lokeshponnada.locationtracker.remoteconfig.AppConfig.LOCATION_INTERVAL_MILLIS;
+import static com.lokeshponnada.locationtracker.remoteconfig.AppConfig.LOCATION_TIME_THRESHOLD;
 
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.trackBtn)
     Button trackBtn;
+
+    private Dialog dialog;
+    boolean currentlyTracking;
 
 
     // Play Services location
@@ -53,17 +58,17 @@ public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private android.location.LocationListener locationListener;
 
-    private Dialog dialog;
+    // Service related
+    LocationPostService locationService;
+    boolean mBound = false;
 
 
     private final int LOCATION_PERMISSION_CODE = 1;
     private final int CHECK_SETTINGS_CODE = 2;
     private final int GPS_REQUEST_CODE = 3;
 
-    LocationPostService locationService;
-    boolean mBound = false;
+    Location lastKnownLocation;
 
-    boolean currentlyTracking;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
         // bind ui
         ButterKnife.bind(this);
-
 
         // set listeners
         setupListeners();
@@ -128,34 +132,58 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        locationListener = new android.location.LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-               postLocation(location);
-            }
+        setFrameworkLocationListener();
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-
-            }
-        };
-
-        locationManager.requestLocationUpdates(AppConfig.LOCATION_PROVIDER, 0, AppConfig.LOCATION_PRECISION, locationListener);
+        locationManager.requestLocationUpdates(AppConfig.LOCATION_PROVIDER, 0, AppConfig.LOCATION_DISTANCE_THRESHOLD, locationListener);
         startLocationService();
         toggleUI();
+
+        lastKnownLocation = locationManager.getLastKnownLocation(AppConfig.LOCATION_PROVIDER);
     }
 
+    private void setPlayServicesLocationListener(){
 
+        if(locationCallback == null){
+
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    for (Location location : locationResult.getLocations()) {
+                        postLocation(location);
+                    }
+                }
+
+            };
+        }
+    }
+
+    private void setFrameworkLocationListener(){
+
+        if(locationListener == null){
+
+            locationListener = new android.location.LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    postLocation(location);
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+
+                @Override
+                public void onProviderEnabled(String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+
+                }
+            };
+        }
+    }
 
     private void startLocationService(){
 
@@ -172,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void postLocation(@NonNull Location location){
         if (mBound) {
-            locationService.processLocation(location);
+            locationService.updateLocation(location);
         }
     }
 
@@ -184,17 +212,9 @@ public class MainActivity extends AppCompatActivity {
 
         locationRequest = new LocationRequest()
                 .setPriority(AppConfig.LOCATION_PRECISION_CODE)
-                .setInterval(LOCATION_INTERVAL_MILLIS);
+                .setInterval(LOCATION_TIME_THRESHOLD);
 
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                for (Location location : locationResult.getLocations()) {
-                    postLocation(location);
-                }
-            }
-
-        };
+        setPlayServicesLocationListener();
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest);
@@ -207,7 +227,14 @@ public class MainActivity extends AppCompatActivity {
             mFusedLocationClient.requestLocationUpdates(locationRequest,
                     locationCallback,
                     null /* Looper */);
-            trackingStarted();
+            mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    lastKnownLocation = location;
+                }
+            });
+
+            startLocationService();
             toggleUI();
         });
 
@@ -225,13 +252,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-
-    // callback for successful tracking
-    private void trackingStarted(){
-        startLocationService();
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -306,10 +326,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
             LocationPostService.LocationBinder binder = (LocationPostService.LocationBinder) service;
             locationService = binder.getService();
             mBound = true;
+            if(lastKnownLocation != null){
+                postLocation(lastKnownLocation);
+            }
         }
 
         @Override
