@@ -58,15 +58,12 @@ public class LocationPostService extends Service {
 
         handler = new Handler();
 
-       periodicUpdate = new Runnable() {
-           @Override
-           public void run() {
-               handler.postDelayed(periodicUpdate, LOCATION_SYNC_MILLIS);
-               if(locationModel != null){
-                   processLocation(LocationModel.getCopy(locationModel));
-               }else{
-                   // wait for 2 more mins
-               }
+       periodicUpdate = () -> {
+           handler.postDelayed(periodicUpdate, LOCATION_SYNC_MILLIS);
+           if(locationModel != null){
+               processLocation(LocationModel.getCopy(locationModel));
+           }else{
+               // wait for 2 more mins
            }
        };
 
@@ -82,7 +79,6 @@ public class LocationPostService extends Service {
 
     public void processLocation(LocationModel model){
         repo.processLocation(model);
-        Log.d("Lokesh",model.getSource() + "-"+model.getTime() + "-"+model.getLat()+"-"+model.getLng());
     }
 
     public void updateLocation(@Nullable Location location){
@@ -94,7 +90,6 @@ public class LocationPostService extends Service {
             locationModel = new LocationModel(location);
             processLocation(LocationModel.getCopy(locationModel));
             handler.postDelayed(periodicUpdate,LOCATION_SYNC_MILLIS);
-            Log.d("Lokesh","Update due to distance threshold");
         }else{
             locationModel = new LocationModel(location);
         }
@@ -103,14 +98,12 @@ public class LocationPostService extends Service {
 
     @Override
     public boolean stopService(Intent name) {
-        Log.d("Lokesh","Stopping Service");
         stopSelf();
         return false;
     }
 
     @Override
     public void onDestroy() {
-        Log.d("Lokesh","Service Destroyed");
         handler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }

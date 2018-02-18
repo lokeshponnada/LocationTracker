@@ -25,7 +25,6 @@ public class LocationSyncJob extends Job {
     @NonNull
     protected Result onRunJob(Params params) {
 
-        Log.d("Lokesh","Running Job at " + System.currentTimeMillis());
         // Iterate db
         LocationRepository repo = LocationRepository.getRepository(getContext());
         TrackerDatabase db = repo.getDb(getContext());
@@ -34,8 +33,6 @@ public class LocationSyncJob extends Job {
         for(LocationModel model: locationList){
             LocationRepository.postLocation(model);
         }
-
-        Log.d("Lokesh","Ran Job at " + System.currentTimeMillis() + " -- " + ((locationList != null) ? locationList.size():"0"));
 
         return Result.SUCCESS;
     }

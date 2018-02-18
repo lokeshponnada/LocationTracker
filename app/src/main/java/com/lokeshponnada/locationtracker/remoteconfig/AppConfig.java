@@ -18,11 +18,12 @@ public  class AppConfig {
             if the device DOES NOT have play services installed   */
     public static int LOCATION_DISTANCE_THRESHOLD = 100;
     public static String LOCATION_PROVIDER = "network";
+    public static String LOCATION_PERMISSION = "android.permission.ACCESS_COARSE_LOCATION"; // needed when using framework api
 
 
     public static int LOCATION_TIME_THRESHOLD = 2*60*1000; // in sec
 
-    public static int LOCATION_SYNC_MILLIS = 3000; // Location sync time with server
+    public static int LOCATION_SYNC_MILLIS = 2*60*1000; // Location sync time with server
 
 
     /* Used by job schedular */

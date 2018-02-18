@@ -17,7 +17,8 @@ public class LocationApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        // todo remove in release
+
+//         todo remove in release
         Stetho.initializeWithDefaults(this);
 
         JobManager.create(this).addJobCreator(new LocationJobCreator());

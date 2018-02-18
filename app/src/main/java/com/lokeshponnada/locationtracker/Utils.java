@@ -29,8 +29,8 @@ public class Utils {
     public static boolean isGooglePlayServicesAvailable(Context context){
         GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context);
-        return false;
 //        return resultCode == ConnectionResult.SUCCESS;
+        return false;
     }
 
     public static boolean isProviderEnabled(@NonNull LocationManager manager, @NonNull String provider){

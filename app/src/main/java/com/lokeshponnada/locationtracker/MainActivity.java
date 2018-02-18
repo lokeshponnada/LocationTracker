@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopTracking(){
 
-        if(locationManager != null){
+        if(locationManager != null && locationListener != null){
             locationManager.removeUpdates(locationListener);
         }
 
@@ -310,9 +310,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean checkLocationPermission(){
-        int res = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int res = ContextCompat.checkSelfPermission(this,AppConfig.LOCATION_PERMISSION);
         if(res != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},LOCATION_PERMISSION_CODE);
+            ActivityCompat.requestPermissions(this,new String[]{AppConfig.LOCATION_PERMISSION},LOCATION_PERMISSION_CODE);
             return false;
         }else{
             return true;
